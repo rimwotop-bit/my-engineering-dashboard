@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Инженерный дашборд дорожного строительства — Бадер И., гр. 1132</title>
+<style>
+  :root {
+    --bg: #f3f5f8; --panel: #ffffff; --text: #1b2430; --muted: #5d6b7a;
+    --border: #d5dce4; --accent: #1f6feb; --accent-text: #ffffff;
+    --card: #eaf2ff; --card-border: #b6d0fb; --ok: #1a7f37; --warn: #b35900; --bad: #c62828;
+  }
+  body.dark {
+    --bg: #12161c; --panel: #1b222b; --text: #e6edf3; --muted: #9aa7b4;
+    --border: #2f3a46; --accent: #4493f8; --accent-text: #0b1117;
+    --card: #182a42; --card-border: #2c4f80;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; background: var(--bg); color: var(--text); transition: background .2s, color .2s; }
+  header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 24px; background: var(--panel); border-bottom: 1px solid var(--border); }
+  header h1 { margin: 0; font-size: 20px; }
+  header .sub { color: var(--muted); font-size: 13px; }
+  .btn { border: 1px solid var(--border); background: var(--panel); color: var(--text); padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+  .btn:hover { border-color: var(--accent); }
+  .btn.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 600; }
+  nav.nav-tabs { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 24px 0; }
+  nav.nav-tabs button { border: 1px solid var(--border); border-bottom: none; background: var(--bg); color: var(--muted); padding: 10px 16px; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 14px; }
+  nav.nav-tabs button.active { background: var(--panel); color: var(--text); font-weight: 600; border-color: var(--accent); }
+  main { padding: 0 24px 32px; }
+  section.tab { display: none; background: var(--panel); border: 1px solid var(--border); border-radius: 0 10px 10px 10px; padding: 20px; }
+  section.tab.active { display: block; }
+  h2 { margin-top: 0; font-size: 19px; }
+  .formula { font-family: Consolas, monospace; background: var(--bg); border: 1px dashed var(--border); padding: 8px 12px; border-radius: 6px; display: inline-block; margin-bottom: 14px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+  input { width: 100%; padding: 9px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-size: 15px; }
+  input.invalid { border-color: var(--bad); background: rgba(198,40,40,.08); }
+  .err { color: var(--bad); font-size: 12px; min-height: 16px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
+  .results { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 10px; padding: 14px 16px; }
+  .card .k { font-size: 13px; color: var(--muted); }
+  .card .v { font-size: 28px; font-weight: 700; margin-top: 4px; }
+  .card .u { font-size: 14px; color: var(--muted); font-weight: 400; }
+  .note { font-size: 13px; color: var(--muted); margin-top: 10px; }
+  .status { font-size: 13px; margin-top: 8px; min-height: 18px; }
+  .lvl-ok { color: var(--ok); } .lvl-warn { color: var(--warn); } .lvl-bad { color: var(--bad); }
+  table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+  th, td { border: 1px solid var(--border); padding: 7px 10px; text-align: left; font-size: 14px; }
+  th { background: var(--bg); }
+  .chart-wrap { margin-top: 16px; }
+  .flash { animation: flash 1s; }
+  @keyframes flash { 0% { box-shadow: 0 0 0 3px var(--accent); } 100% { box-shadow: none; } }
+  @media print {
+    body { background: #fff !important; color: #000 !important; }
+    header .controls, nav.nav-tabs, .actions, .btn, .no-print { display: none !important; }
+    section.tab { display: none !important; border: none !important; }
+    section#tab-report { display: block !important; }
+    th, td { border: 1px solid #000 !important; color: #000 !important; background: #fff !important; }
+    header { border: none !important; background: #fff !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Инженерный дашборд дорожного строительства</h1>
+    <div class="sub">Бадер Иван · группа 1132 · вариант 3 · ПЗ №19 / №24</div>
+  </div>
+  <div class="controls" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+    <label style="margin:0;">Объект:</label>
+    <input id="objectName" style="width:220px;" value="Автодорога, участок ПК0–ПК10">
+    <button class="btn" id="themeBtn" type="button">🌙 Тёмная тема</button>
+  </div>
+</header>
+
+<nav class="nav-tabs">
+  <button type="button" data-tab="tab-m1" class="active">Модуль 1: Пропускная способность</button>
+  <button type="button" data-tab="tab-m2">Модуль 2: Коэффициент загрузки Z</button>
+  <button type="button" data-tab="tab-m3">Модуль 3: Интервал автобусов</button>
+  <button type="button" data-tab="tab-report">Сводный отчёт</button>
+</nav>
+
+<main>
+  <!-- МОДУЛЬ 1 -->
+  <section class="tab active" id="tab-m1">
+    <h2>Модуль 1. Пропускная способность полосы</h2>
+    <div class="formula">P = 3600 / t · K</div>
+    <div class="grid">
+      <div><label for="m1_t">Интервал между автомобилями t, с</label><input id="m1_t" type="number" min="0" step="0.1" value="2"><div class="err"></div></div>
+      <div><label for="m1_k">Коэффициент условий движения K (0,7–1,0)</label><input id="m1_k" type="number" min="0" max="1" step="0.01" value="0.9"><div class="err"></div></div>
+    </div>
+    <div class="actions">
+      <button class="btn primary" type="button" onclick="calcModule1(true)">Рассчитать</button>
+      <button class="btn" type="button" onclick="transferM1toM2()">Передать интенсивность P в Модуль 2 →</button>
+    </div>
+    <div class="results">
+      <div class="card"><div class="k">Пропускная способность P</div><div class="v" id="m1_P">—</div></div>
+    </div>
+    <div class="status" id="m1_status"></div>
+  </section>
+
+  <!-- МОДУЛЬ 2 -->
+  <section class="tab" id="tab-m2">
+    <h2>Модуль 2. Коэффициент загрузки дороги движением</h2>
+    <div class="formula">Z = N / P</div>
+    <div class="grid">
+      <div><label for="m2_n">Интенсивность движения N, авто/ч</label><input id="m2_n" type="number" min="0" step="1" value="1200"><div class="err"></div></div>
+      <div><label for="m2_p">Пропускная способность P, авто/ч</label><input id="m2_p" type="number" min="0" step="1" value="1620"><div class="err"></div></div>
+    </div>
+    <div class="actions">
+      <button class="btn primary" type="button" onclick="calcModule2(true)">Рассчитать</button>
+      <button class="btn" type="button" onclick="transferM2toM3()">Передать Z в Модуль 3 →</button>
+    </div>
+    <div class="results">
+      <div class="card"><div class="k">Коэффициент загрузки Z</div><div class="v" id="m2_Z">—</div></div>
+      <div class="card"><div class="k">Оценка загрузки</div><div class="v" id="m2_lvl" style="font-size:20px;">—</div></div>
+    </div>
+    <div class="status" id="m2_status"></div>
+  </section>
+
+  <!-- МОДУЛЬ 3 -->
+  <section class="tab" id="tab-m3">
+    <h2>Модуль 3. Время оборота и интервал движения автобусов</h2>
+    <div class="formula">T = 2L / V · 60;&nbsp;&nbsp; I = T / N</div>
+    <div class="grid">
+      <div><label for="m3_l">Длина маршрута L, км</label><input id="m3_l" type="number" min="0" step="0.1" value="12"><div class="err"></div></div>
+      <div><label for="m3_v">Эксплуатационная скорость V, км/ч</label><input id="m3_v" type="number" min="0" step="0.1" value="20"><div class="err"></div></div>
+      <div><label for="m3_n">Число автобусов на маршруте N, шт</label><input id="m3_n" type="number" min="0" step="1" value="6"><div class="err"></div></div>
+      <div><label for="m3_z">Коэффициент загрузки дороги Z (из Модуля 2)</label><input id="m3_z" type="number" min="0" step="0.001" value=""><div class="err"></div></div>
+    </div>
+    <div class="actions">
+      <button class="btn primary" type="button" onclick="calcModule3(true)">Рассчитать</button>
+    </div>
+    <div class="results">
+      <div class="card"><div class="k">Время оборота T</div><div class="v" id="m3_T">—</div></div>
+      <div class="card"><div class="k">Интервал движения I</div><div class="v" id="m3_I">—</div></div>
+    </div>
+    <div class="note" id="m3_note"></div>
+    <div class="status" id="m3_status"></div>
+  </section>
+
+  <!-- СВОДНЫЙ ОТЧЁТ -->
+  <section class="tab" id="tab-report">
+    <h2>Сводный отчёт по проекту</h2>
+    <div class="actions">
+      <button class="btn primary" type="button" onclick="buildReport()">Сформировать отчёт</button>
+      <button class="btn" type="button" onclick="saveProject()">Сохранить проект</button>
+      <button class="btn" type="button" onclick="exportCSV()">Экспорт в CSV</button>
+      <button class="btn" type="button" onclick="window.print()">Печать / Экспорт в PDF</button>
+    </div>
+    <div id="reportMeta" class="note"></div>
+    <table>
+      <thead><tr><th>Модуль</th><th>Входные данные</th><th>Результат</th></tr></thead>
+      <tbody id="reportBody"></tbody>
+    </table>
+    <div class="chart-wrap">
+      <h3 style="font-size:16px;">Визуализация: загрузка дороги Z</h3>
+      <svg id="zChart" width="100%" height="70" viewBox="0 0 600 70" preserveAspectRatio="none"></svg>
+    </div>
+    <div class="status" id="report_status"></div>
+  </section>
+</main>
+
+<script>
+  // ===== Настройки отправки в Google Таблицу (ПЗ №24) =====
+  // Вставьте сюда URL веб-приложения Google Apps Script (https://script.google.com/macros/s/.../exec)
+  const SCRIPT_URL = 'ВАШ_SCRIPT_URL';
+
+  const state = { m1: null, m2: null, m3: null };
+
+  function round(x, d) { const p = Math.pow(10, d); return Math.round(x * p) / p; }
+  function fmt(x, d) { return round(x, d).toLocaleString('ru-RU', { maximumFractionDigits: d }); }
+
+  // ----- Вкладки -----
+  document.querySelectorAll('nav.nav-tabs button').forEach(btn => {
+    btn.addEventListener('click', e => { e.preventDefault(); showTab(btn.dataset.tab); });
+  });
+  function showTab(id) {
+    document.querySelectorAll('section.tab').forEach(s => s.classList.toggle('active', s.id === id));
+    document.querySelectorAll('nav.nav-tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
+    if (id === 'tab-report') buildReport();
+  }
+
+  // ----- Тема -----
+  const themeBtn = document.getElementById('themeBtn');
+  function applyTheme(dark) {
+    document.body.classList.toggle('dark', dark);
+    themeBtn.textContent = dark ? '☀️ Светлая тема' : '🌙 Тёмная тема';
+    localStorage.setItem('dash_theme', dark ? 'dark' : 'light');
+  }
+  themeBtn.addEventListener('click', () => applyTheme(!document.body.classList.contains('dark')));
+
+  // ----- Валидация -----
+  function readNum(id, opts) {
+    opts = opts || {};
+    const el = document.getElementById(id);
+    const err = el.parentElement.querySelector('.err');
+    const raw = el.value.trim();
+    let msg = '';
+    if (raw === '') { if (opts.optional) { el.classList.remove('invalid'); if (err) err.textContent = ''; return null; } msg = 'Введите значение'; }
+    const v = Number(raw);
+    if (!msg && !isFinite(v)) msg = 'Некорректное число';
+    else if (!msg && v < 0) msg = 'Отрицательные значения запрещены';
+    else if (!msg && opts.positive && v === 0) msg = 'Значение должно быть больше 0';
+    else if (!msg && opts.max !== undefined && v > opts.max) msg = 'Не больше ' + opts.max;
+    el.classList.toggle('invalid', !!msg);
+    if (err) err.textContent = msg;
+    return msg ? NaN : v;
+  }
+  document.querySelectorAll('input[type=number]').forEach(el => {
+    el.addEventListener('input', () => { if (Number(el.value) < 0) el.value = Math.abs(Number(el.value)); });
+  });
+
+  // ----- Модуль 1 -----
+  function calcModule1(send) {
+    const t = readNum('m1_t', { positive: true });
+    const K = readNum('m1_k', { positive: true, max: 1 });
+    if (isNaN(t) || isNaN(K)) { state.m1 = null; document.getElementById('m1_P').innerHTML = '—'; return false; }
+    const P = 3600 / t * K;
+    state.m1 = { t, K, P };
+    document.getElementById('m1_P').innerHTML = fmt(P, 1) + ' <span class="u">авто/ч</span>';
+    persist();
+    if (send) sendToSheet('Модуль 1: Пропускная способность', 'P = ' + fmt(P, 1) + ' авто/ч', 't=' + t + ' с, K=' + K, 'm1_status');
+    return true;
+  }
+
+  // ----- Модуль 2 -----
+  function zLevel(Z) {
+    if (Z < 0.2) return ['А — свободное движение', 'lvl-ok'];
+    if (Z < 0.45) return ['Б — частично связанное', 'lvl-ok'];
+    if (Z < 0.7) return ['В — связанное движение', 'lvl-warn'];
+    if (Z <= 1) return ['Г — колонное, близко к пределу', 'lvl-bad'];
+    return ['Перегрузка (Z > 1)', 'lvl-bad'];
+  }
+  function calcModule2(send) {
+    const N = readNum('m2_n');
+    const P = readNum('m2_p', { positive: true });
+    if (isNaN(N) || isNaN(P)) { state.m2 = null; document.getElementById('m2_Z').textContent = '—'; document.getElementById('m2_lvl').textContent = '—'; return false; }
+    const Z = N / P;
+    const lvl = zLevel(Z);
+    state.m2 = { N, P, Z, level: lvl[0] };
+    document.getElementById('m2_Z').textContent = fmt(Z, 3);
+    const lvlEl = document.getElementById('m2_lvl');
+    lvlEl.textContent = lvl[0]; lvlEl.className = 'v ' + lvl[1]; lvlEl.style.fontSize = '20px';
+    persist();
+    if (send) sendToSheet('Модуль 2: Коэффициент загрузки Z', 'Z = ' + fmt(Z, 3) + ' (' + lvl[0] + ')', 'N=' + N + ' авто/ч, P=' + round(P, 1) + ' авто/ч', 'm2_status');
+    return true;
+  }
+
+  // ----- Модуль 3 -----
+  function calcModule3(send) {
+    const L = readNum('m3_l', { positive: true });
+    const V = readNum('m3_v', { positive: true });
+    const N = readNum('m3_n', { positive: true });
+    const Z = readNum('m3_z', { optional: true });
+    if (isNaN(L) || isNaN(V) || isNaN(N) || isNaN(Z)) { state.m3 = null; document.getElementById('m3_T').textContent = '—'; document.getElementById('m3_I').textContent = '—'; return false; }
+    const T = 2 * L / V * 60;
+    const I = T / N;
+    state.m3 = { L, V, N, Z, T, I };
+    document.getElementById('m3_T').innerHTML = fmt(T, 1) + ' <span class="u">мин</span>';
+    document.getElementById('m3_I').innerHTML = fmt(I, 1) + ' <span class="u">мин</span>';
+    document.getElementById('m3_note').textContent = (Z === null)
+      ? 'Z не передан из Модуля 2.'
+      : 'Загрузка дороги Z = ' + fmt(Z, 3) + ' (' + zLevel(Z)[0] + '). При Z ≥ 0,7 фактическая скорость автобусов может быть ниже расчётной — проверьте V.';
+    persist();
+    if (send) sendToSheet('Модуль 3: Интервал автобусов', 'T = ' + fmt(T, 1) + ' мин, I = ' + fmt(I, 1) + ' мин', 'L=' + L + ' км, V=' + V + ' км/ч, N=' + N + ' шт' + (Z === null ? '' : ', Z=' + round(Z, 3)), 'm3_status');
+    return true;
+  }
+
+  // ----- Межмодульная передача -----
+  function flash(id) { const el = document.getElementById(id); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
+  function transferM1toM2() {
+    if (!calcModule1(false)) return;
+    document.getElementById('m2_p').value = round(state.m1.P, 1);
+    showTab('tab-m2'); flash('m2_p');
+    calcModule2(false);
+  }
+  function transferM2toM3() {
+    if (!calcModule2(false)) return;
+    document.getElementById('m3_z').value = round(state.m2.Z, 3);
+    showTab('tab-m3'); flash('m3_z');
+    calcModule3(false);
+  }
+
+  // ----- Сводный отчёт -----
+  function buildReport() {
+    calcModule1(false); calcModule2(false); calcModule3(false);
+    const rows = [];
+    const m1 = state.m1, m2 = state.m2, m3 = state.m3;
+    rows.push(['Модуль 1: Пропускная способность', m1 ? 't = ' + m1.t + ' с; K = ' + m1.K : '—', m1 ? 'P = ' + fmt(m1.P, 1) + ' авто/ч' : '—']);
+    rows.push(['Модуль 2: Коэффициент загрузки Z', m2 ? 'N = ' + m2.N + ' авто/ч; P = ' + fmt(m2.P, 1) + ' авто/ч' : '—', m2 ? 'Z = ' + fmt(m2.Z, 3) + ' — ' + m2.level : '—']);
+    rows.push(['Модуль 3: Интервал автобусов', m3 ? 'L = ' + m3.L + ' км; V = ' + m3.V + ' км/ч; N = ' + m3.N + ' шт' + (m3.Z === null ? '' : '; Z = ' + fmt(m3.Z, 3)) : '—', m3 ? 'T = ' + fmt(m3.T, 1) + ' мин; I = ' + fmt(m3.I, 1) + ' мин' : '—']);
+    document.getElementById('reportBody').innerHTML = rows.map(r => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td><td>' + r[2] + '</td></tr>').join('');
+    document.getElementById('reportMeta').textContent = 'Объект: ' + document.getElementById('objectName').value + ' · Дата: ' + new Date().toLocaleString('ru-RU') + ' · Исполнитель: Бадер И., гр. 1132';
+    drawChart();
+    return rows;
+  }
+  function drawChart() {
+    const svg = document.getElementById('zChart');
+    const Z = state.m2 ? state.m2.Z : 0;
+    const w = Math.min(Z, 1.2) / 1.2 * 580;
+    const color = Z < 0.45 ? '#1a7f37' : (Z < 0.7 ? '#d48806' : '#c62828');
+    let marks = '';
+    [0, 0.2, 0.45, 0.7, 1.0].forEach(v => { const x = 10 + v / 1.2 * 580; marks += '<line x1="' + x + '" y1="8" x2="' + x + '" y2="42" stroke="#888" stroke-dasharray="3"/><text x="' + x + '" y="60" font-size="12" text-anchor="middle" fill="currentColor">' + v + '</text>'; });
+    svg.innerHTML = '<rect x="10" y="14" width="580" height="22" fill="#8884" rx="4"/>' +
+      '<rect x="10" y="14" width="' + w + '" height="22" fill="' + color + '" rx="4"/>' + marks +
+      '<text x="' + (14 + w) + '" y="30" font-size="13" fill="currentColor">Z = ' + fmt(Z, 3) + '</text>';
+  }
+  function exportCSV() {
+    const rows = buildReport();
+    const csv = '﻿' + [['Модуль', 'Входные данные', 'Результат']].concat(rows)
+      .map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(';')).join('\r\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = 'dashboard_report.csv';
+    a.click();
+  }
+
+  // ----- Сохранение состояния -----
+  const FIELDS = ['objectName', 'm1_t', 'm1_k', 'm2_n', 'm2_p', 'm3_l', 'm3_v', 'm3_n', 'm3_z'];
+  function persist() {
+    const data = {}; FIELDS.forEach(id => data[id] = document.getElementById(id).value);
+    sessionStorage.setItem('dash_session', JSON.stringify(data));
+  }
+  function saveProject() {
+    persist();
+    localStorage.setItem('dash_project', sessionStorage.getItem('dash_session'));
+    document.getElementById('report_status').textContent = '✔ Проект сохранён в localStorage (' + new Date().toLocaleTimeString('ru-RU') + ')';
+  }
+  function restore() {
+    const raw = sessionStorage.getItem('dash_session') || localStorage.getItem('dash_project');
+    if (!raw) return;
+    try { const data = JSON.parse(raw); FIELDS.forEach(id => { if (data[id] !== undefined) document.getElementById(id).value = data[id]; }); } catch (e) {}
+  }
+
+  // ----- Отправка в Google Таблицу (ПЗ №24) -----
+  function sendToSheet(moduleName, result, inputData, statusId) {
+    const st = document.getElementById(statusId);
+    if (!SCRIPT_URL || SCRIPT_URL.indexOf('script.google.com') === -1) {
+      st.textContent = 'ℹ Отправка в Google Таблицу не настроена (SCRIPT_URL).';
+      return;
+    }
+    const dataToSend = {
+      objectName: document.getElementById('objectName').value || 'Объект',
+      module: moduleName,
+      result: result,
+      inputData: inputData
+    };
+    st.textContent = '⏳ Отправка в Google Таблицу...';
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(dataToSend)
+    })
+      .then(() => { st.textContent = '✔ Данные отправлены в Google Таблицу'; console.log('Данные отправлены', dataToSend); })
+      .catch(err => { st.textContent = '✖ Ошибка отправки: ' + err; console.error('Ошибка:', err); });
+  }
+
+  // ----- Старт -----
+  applyTheme(localStorage.getItem('dash_theme') === 'dark');
+  restore();
+  calcModule1(false); calcModule2(false); calcModule3(false);
+  document.querySelectorAll('input').forEach(el => el.addEventListener('change', persist));
+</script>
+</body>
+</html>
